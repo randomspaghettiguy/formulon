@@ -1,6 +1,6 @@
 {
   "name": "formulon",
-  "version": "0.0.0-development",
+  "version": "1.0.0",
   "description": "Salesforce formula parser and evaluator: every documented function, linear-time, no dependencies",
   "main": "lib/formulon.cjs",
   "engines": {
@@ -12,14 +12,13 @@
     "lint": "eslint .",
     "size": "node scripts/size.mjs",
     "cases:merge": "node scripts/cases-to-csv.mjs",
-    "commitlint": "commitlint",
-    "semantic-release": "semantic-release",
     "cases:report": "node scripts/cases-report.mjs",
-    "verify:org": "node scripts/verify-org.mjs"
+    "verify:org": "node scripts/verify-org.mjs",
+    "prepare": "rollup -c"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/leifg/formulon.git"
+    "url": "https://github.com/randomspaghettiguy/formulon.git"
   },
   "keywords": [
     "parser",
@@ -29,21 +28,11 @@
   "author": "Leif Gensert",
   "license": "MIT",
   "devDependencies": {
-    "@commitlint/config-conventional": "^20.0.0",
     "@rollup/plugin-terser": "^0.4.4",
-    "@types/node": "^24.0.1",
-    "@vitest/eslint-plugin": "^1.1.36",
-    "commitlint": "^20.1.0",
     "eslint": "^9.25.1",
     "rollup": "^4.40.1",
-    "semantic-release": "^25.0.1",
     "vitest": "^4.0.3",
     "@eslint/js": "^9.25.1"
-  },
-  "release": {
-    "branches": [
-      "main"
-    ]
   },
   "module": "lib/formulon.mjs",
   "types": "index.d.ts",
