@@ -1,13 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import {
   build, extract, replace, traverse,
-} from '../../src/ast';
-import { testBuildAst } from './shared';
+} from '../../src/ast.js';
+import { testBuildAst } from './shared.js';
 
 describe('ast', () => {
   describe('build', () => {
     testBuildAst(build);
   });
+
 
   describe('traverse', () => {
     describe('literal', () => {

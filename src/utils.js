@@ -1,19 +1,35 @@
-import { timeParser } from './parsers';
-import FormulonRuntimeError from './errors/FormulonRuntimeError';
+import FormulonRuntimeError from './errors/FormulonRuntimeError.js';
 
 const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
 
-// Salesforce rounding works slightly different than JS rounding
-// JS:
-// Math.round(-1.5) => -1
-// SF:
-// ROUND(-1.5) => -2
+// Arithmetic on doubles leaves noise past the 15th significant digit (0.1 + 0.2 =
+// 0.30000000000000004). Salesforce computes in decimal, so results are cut back to 15 digits.
+export const cleanNumber = (n) => {
+  if (!Number.isFinite(n)) return n;
+  const cleaned = parseFloat(n.toPrecision(15));
+  return Object.is(cleaned, -0) ? 0 : cleaned;
+};
+
+// Salesforce rounds half away from zero: ROUND(-1.5, 0) = -2, where JS Math.round gives -1.
 export const sfRound = (number, numDigits) => {
-  if (number < 0) {
-    return -1 * sfRound(number * -1, numDigits);
-  }
-  const multiplier = (10 ** numDigits);
-  return Math.round(number * multiplier) / multiplier;
+  if (number < 0) return -sfRound(-number, numDigits);
+  const factor = 10 ** numDigits;
+  return cleanNumber(Math.round(cleanNumber(number * factor)) / factor);
+};
+
+// Plain decimal notation, never exponent notation: 1e21 -> "1000000000000000000000".
+export const formatNumber = (n) => (Math.abs(n) >= 1e21 || (n !== 0 && Math.abs(n) < 1e-6)
+  ? n.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 20 })
+  : String(n));
+
+// A UTC midnight date, or null when the parts are not a real calendar date. Formulas accept the
+// years -4713 to 9999 ("Tips for Using Date and Date/Time Formulas"); fields store 1700-4000.
+export const utcDate = (year, month, day) => {
+  if (![year, month, day].every(Number.isInteger)) return null;
+  if (year < -4713 || year > 9999 || year === 0 || month < 1 || month > 12 || day < 1) return null;
+  const d = new Date(Date.UTC(2000, month - 1, day));
+  d.setUTCFullYear(year);
+  return d.getUTCDate() === day && d.getUTCMonth() === month - 1 ? d : null;
 };
 
 // private
@@ -85,24 +101,20 @@ export const buildLiteralFromJs = (input) => {
   }
 };
 
-export const parseTime = (input) => {
-  try {
-    return timeParser.parse(input);
-  } catch (err) {
-    if (err instanceof timeParser.SyntaxError) {
-      return buildLiteralFromJs(null);
-    }
-
-    throw err;
-  }
-};
-
 export const buildErrorLiteral = (errorType, message, options) => ({
   type: 'error',
   errorType,
   message,
   ...options,
 });
+
+const MIN_TIME = new Date(Date.UTC(2000, 0, 1)).setUTCFullYear(-4713);
+const MAX_TIME = Date.UTC(10000, 0, 1) - 1;
+const checkRange = (time) => {
+  if (!(time >= MIN_TIME && time <= MAX_TIME)) {
+    throw new FormulonRuntimeError('#Error! The date is outside the supported range (-4713 to 9999).', 'RuntimeError', {});
+  }
+};
 
 export const buildDateLiteral = (yearOrDateObj, month, day) => {
   if (yearOrDateObj instanceof Date) {
@@ -113,20 +125,26 @@ export const buildDateLiteral = (yearOrDateObj, month, day) => {
     );
   }
 
+  const value = new Date(Date.UTC(2000, month - 1, day));
+  value.setUTCFullYear(yearOrDateObj);
+  checkRange(value.getTime());
   return {
     type: 'literal',
     dataType: 'date',
-    value: new Date(Date.UTC(yearOrDateObj, month - 1, day)),
+    value,
     options: {},
   };
 };
 
-export const buildDatetimeLiteral = (unixTimestamp) => ({
-  type: 'literal',
-  dataType: 'datetime',
-  value: new Date(unixTimestamp),
-  options: {},
-});
+export const buildDatetimeLiteral = (unixTimestamp) => {
+  checkRange(unixTimestamp);
+  return {
+    type: 'literal',
+    dataType: 'datetime',
+    value: new Date(unixTimestamp),
+    options: {},
+  };
+};
 
 export const buildGeolocationLiteral = (latitude, longitude) => ({
   type: 'literal',
@@ -149,10 +167,11 @@ export const buildMultipicklistLiteral = (value, values) => ({
   options: { values },
 });
 
+// Time wraps around midnight: 23:00 + 2 hours is 01:00.
 export const buildTimeLiteral = (millisecondsFromMidnight) => ({
   type: 'literal',
   dataType: 'time',
-  value: new Date(millisecondsFromMidnight),
+  value: new Date(((millisecondsFromMidnight % 86400000) + 86400000) % 86400000),
   options: {},
 });
 
@@ -189,16 +208,17 @@ export const handleFormulonError = (fn) => {
   }
 };
 
-// shamelessly stolen from https://stackoverflow.com/a/12793246/1087469
+// ADDMONTHS: the same day in the target month, clamped to that month's length. A date on the last
+// day of its month moves to the last day of the target month.
 export const addMonths = (date, numOfMonths) => {
-  const newMonth = date.getUTCMonth() + numOfMonths;
-  const newDate = new Date(Date.UTC(date.getUTCFullYear(), newMonth, date.getUTCDate()));
-
-  if (date.getUTCDate() !== newDate.getUTCDate()) {
-    newDate.setUTCDate(0);
-  }
-
-  return newDate;
+  const y = date.getUTCFullYear();
+  const m = date.getUTCMonth();
+  const d = date.getUTCDate();
+  const timeOfDay = date.getTime() - Date.UTC(y, m, d);
+  const lastOfSource = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  const lastOfTarget = new Date(Date.UTC(y, m + numOfMonths + 1, 0)).getUTCDate();
+  const day = d === lastOfSource ? lastOfTarget : Math.min(d, lastOfTarget);
+  return new Date(Date.UTC(y, m + numOfMonths, day) + timeOfDay);
 };
 
 export const addDays = (date, numOfDays) => (

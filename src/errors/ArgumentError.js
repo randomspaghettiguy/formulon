@@ -1,4 +1,4 @@
-import FormulonRuntimeError from './FormulonRuntimeError';
+import FormulonRuntimeError from './FormulonRuntimeError.js';
 
 const capitalize = (s) => {
   if (Array.isArray(s)) {

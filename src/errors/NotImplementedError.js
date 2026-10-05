@@ -1,4 +1,4 @@
-import FormulonRuntimeError from './FormulonRuntimeError';
+import FormulonRuntimeError from './FormulonRuntimeError.js';
 
 export default class NotImplementedError extends FormulonRuntimeError {
   constructor(message, options) {
