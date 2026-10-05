@@ -1,9 +1,8 @@
-/* global describe it */
 
 import { expect } from 'vitest';
 
-import dispatch from '../../src/functionDispatcher';
-import { buildLiteralFromJs } from '../../src/utils';
+import dispatch from '../../src/functionDispatcher.js';
+import { buildLiteralFromJs } from '../../src/utils.js';
 
 describe('dispatch', () => {
   describe('valid input', () => {

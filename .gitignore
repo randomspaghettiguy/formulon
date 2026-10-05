@@ -5,3 +5,4 @@
 /tmp
 yarn-error.log
 src/*.grammar.js
+/tmp/verify-org

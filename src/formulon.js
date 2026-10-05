@@ -1,42 +1,34 @@
-import {
-  build, extract as astExtract, replace, traverse,
-} from './ast';
-import {
-  arrayUnique, buildLiteralFromJs, coerceLiteral, formatLiteral,
-} from './utils';
+import { compile, evaluate } from './evaluate.js';
+import { formatLiteral } from './utils.js';
+import { SIGNATURES } from './signatures.js';
 
-export const parse = (formula, substitutions = {}) => {
+export { compile, evaluate };
+
+// Every function name this library knows, upper case.
+export const functionNames = () => Object.keys(SIGNATURES)
+  .filter((name) => /^[a-z0-9]+$/.test(name))
+  .map((name) => name.toUpperCase());
+
+// Formulon's original entry point: evaluate with { Name: { type: 'literal', dataType, value } }.
+export const parse = (formula, substitutions = {}, options = {}) => {
   if (formula == null || formula.trim() === '') {
-    return buildLiteralFromJs('');
+    return {
+      type: 'literal', value: '', dataType: 'text', options: { length: 0 },
+    };
   }
-
-  const ast = build(formula);
-
-  const coercedSubstitutions = Object.keys(substitutions).reduce((previous, current) => (
-    {
-      ...previous,
-      [current]: coerceLiteral(substitutions[current]),
-    }
-  ), {});
-
-  return traverse(replace(ast, coercedSubstitutions));
+  return evaluate(formula, substitutions, options);
 };
 
+// Field names a formula references, in order of first use.
 export const extract = (formula) => {
-  if (formula == null || formula.trim() === '') {
-    return [];
-  }
-
-  const ast = build(formula);
-  return arrayUnique(astExtract(ast));
+  if (formula == null || formula.trim() === '') return [];
+  return compile(formula).references;
 };
 
 export const ast = (formula) => {
-  if (formula == null || formula.trim() === '') {
-    return {};
-  }
-
-  return build(formula);
+  if (formula == null || formula.trim() === '') return {};
+  const compiled = compile(formula);
+  return compiled.error ?? compiled.ast;
 };
 
 export const toString = (literal) => formatLiteral(literal);

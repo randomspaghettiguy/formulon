@@ -1,5 +1,3 @@
-/* eslint import/prefer-default-export: 0 */
-/* global describe it */
 
 import { expect } from 'vitest';
 
@@ -258,7 +256,7 @@ export const testBuildAst = (handler) => {
     it('string concatenation', () => {
       const expected = {
         type: 'callExpression',
-        id: 'add',
+        id: 'concat',
         arguments: [
           {
             type: 'literal',

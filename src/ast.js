@@ -1,8 +1,9 @@
-import dispatch from './functionDispatcher';
-import ReferenceError from './errors/ReferenceError';
+import dispatch from './functionDispatcher.js';
+import ReferenceError from './errors/ReferenceError.js';
 
-import { salesforceParser } from './parsers';
-import { buildErrorLiteral, handleFormulonError } from './utils';
+import { parseFormula } from './parser.js';
+import FormulonRuntimeError from './errors/FormulonRuntimeError.js';
+import { buildErrorLiteral, handleFormulonError } from './utils.js';
 
 const traverseAndThrow = (ast) => {
   switch (ast.type) {
@@ -19,10 +20,10 @@ const traverseAndThrow = (ast) => {
 
 export const build = (formula) => {
   try {
-    return salesforceParser.parse(formula == null ? '' : formula.trim());
+    return parseFormula(formula == null ? '' : formula.trim());
   } catch (err) {
-    if (err instanceof salesforceParser.SyntaxError) {
-      return buildErrorLiteral('SyntaxError', 'Syntax error.', {});
+    if (err instanceof FormulonRuntimeError) {
+      return buildErrorLiteral(err.errorType, err.message, err.options);
     }
 
     throw err;

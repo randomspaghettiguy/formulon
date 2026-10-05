@@ -1,22 +1,24 @@
 {
   "name": "formulon",
-  "version": "0.0.0-development",
-  "description": "Salesforce Formula Parser",
-  "main": "lib/formulon.js",
+  "version": "1.0.0",
+  "description": "Salesforce formula parser and evaluator: every documented function, linear-time, no dependencies",
+  "main": "lib/formulon.cjs",
   "engines": {
-    "node": ">=11.0.0"
+    "node": ">=18"
   },
   "scripts": {
-    "build": "yarn compile:parser && yarn rollup -c",
-    "compile:parser": "node .scripts/make-peggy",
+    "build": "rollup -c",
     "test": "vitest",
     "lint": "eslint .",
-    "commitlint": "commitlint",
-    "semantic-release": "semantic-release"
+    "size": "node scripts/size.mjs",
+    "cases:merge": "node scripts/cases-to-csv.mjs",
+    "cases:report": "node scripts/cases-report.mjs",
+    "verify:org": "node scripts/verify-org.mjs",
+    "prepare": "rollup -c"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/leifg/formulon.git"
+    "url": "https://github.com/randomspaghettiguy/formulon.git"
   },
   "keywords": [
     "parser",
@@ -25,32 +27,27 @@
   ],
   "author": "Leif Gensert",
   "license": "MIT",
-  "dependencies": {
-    "decimal.js": "^10.3.1"
-  },
   "devDependencies": {
-    "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.8.4",
-    "@babel/eslint-parser": "^7.16.3",
-    "@babel/preset-env": "^7.8.4",
-    "@babel/register": "^7.8.3",
-    "@commitlint/config-conventional": "^20.0.0",
     "@rollup/plugin-terser": "^0.4.4",
-    "@types/node": "^24.0.1",
-    "@vitest/eslint-plugin": "^1.1.36",
-    "commitlint": "^20.1.0",
     "eslint": "^9.25.1",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.20.2",
-    "glob": "^11.0.1",
-    "peggy": "^5.0.2",
     "rollup": "^4.40.1",
-    "semantic-release": "^25.0.1",
-    "vitest": "^4.0.3"
+    "vitest": "^4.0.3",
+    "@eslint/js": "^9.25.1"
   },
-  "release": {
-    "branches": [
-      "main"
-    ]
-  }
+  "module": "lib/formulon.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./lib/formulon.mjs",
+      "require": "./lib/formulon.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "index.d.ts"
+  ],
+  "sideEffects": false,
+  "type": "module"
 }
