@@ -9,7 +9,7 @@ hang the page that calls it.
   and Functions* reference (Winter '27). Functions that only work inside a live org (VLOOKUP,
   GETSESSIONID, URLFOR, report summaries...) take an implementation from the host, and otherwise
   report `NotSupportedError` instead of inventing a value.
-- **2,478 test cases** in [`test/cases/formula-test-cases.csv`](test/cases/formula-test-cases.csv),
+- **2,490 test cases** in [`test/cases/formula-test-cases.csv`](test/cases/formula-test-cases.csv),
   each tied to the Salesforce documentation it comes from (see *Test cases* below).
 - **Cannot hang**: a single-pass parser, a linear-time regular expression engine, size caps checked
   before allocating, and a time budget on 47 adversarial performance cases.
@@ -69,7 +69,9 @@ are dotted names (`Account.Name`, `$User.Id`).
   yourself; never as raw HTML.
 - `image`: `value` is `{ url, alt, height, width }`.
 - `html`: text joined with links or images (`IMAGE(...) & IMAGE(...)`). Every piece of text in it is
-  HTML-escaped and the only tags are the generated `<a>` and `<img>`, so it is safe to render as HTML.
+  HTML-escaped, the only tags are the generated `<a>` and `<img>`, and only http(s), mailto, tel, ftp
+  and relative URLs become an `href`/`src` (a `javascript:` URL from a field value is dropped), so it
+  is safe to render as HTML.
 
 Errors: `SyntaxError`, `ArgumentError` (wrong parameter count or type, which Salesforce reports at save
 time), `ReferenceError` (field not given), `NoFunctionError`, `RuntimeError` (`#Error!`: division by

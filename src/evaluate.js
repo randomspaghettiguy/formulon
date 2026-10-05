@@ -152,14 +152,22 @@ const expandParams = (params, count) => Array.from(
 // HYPERLINK/IMAGE results used as text (for example inside `&`) become escaped HTML, which is
 // what Salesforce's text form of them is.
 const escapeHtml = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+// Only these schemes become an href/src in generated HTML; a javascript: or data: URL coming
+// from a field value would otherwise be one click away from running script.
+const SAFE_URL = /^\s*(?:https?:|mailto:|tel:|ftp:|\/|#|\?|[^:/?#]*(?:[/?#]|$))/i;
+const safeUrl = (url) => (SAFE_URL.test(String(url ?? '')) ? url : null);
+
 const toHtml = (arg) => {
   const v = arg.value;
   if (arg.dataType === 'html') return v;
   if (arg.dataType === 'text') return escapeHtml(v);
   if (arg.dataType === 'hyperlink') {
     const label = v.label && typeof v.label === 'object' ? toHtml({ dataType: 'image', value: v.label }) : escapeHtml(v.label);
-    return `<a href="${escapeHtml(v.url)}"${v.target ? ` target="${escapeHtml(v.target)}"` : ''}>${label}</a>`;
+    const href = safeUrl(v.url);
+    if (href === null) return label;
+    return `<a href="${escapeHtml(href)}"${v.target ? ` target="${escapeHtml(v.target)}"` : ''}>${label}</a>`;
   }
+  if (safeUrl(v.url) === null) return escapeHtml(v.alt);
   return `<img src="${escapeHtml(v.url)}" alt="${escapeHtml(v.alt)}"${v.height != null ? ` height="${escapeHtml(v.height)}"` : ''}${v.width != null ? ` width="${escapeHtml(v.width)}"` : ''} border="0"/>`;
 };
 const RICH = new Set(['hyperlink', 'image', 'html']);
