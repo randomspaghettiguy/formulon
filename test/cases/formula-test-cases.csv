@@ -8244,6 +8244,29 @@ TEXT-VALUE-024,Medium,"Claude (AI), review pending",2026-10-05,Automated (npm ru
 2. Evaluate the formula in Test Data with the field values in Test Data.
 3. Compare the result type and value with Expected Results.","Formula:
 VALUE(""1"", ""2"")",error: ArgumentError,The evaluation returns a result and throws nothing.,Pass,Confidence: derived. Expected result derived from documented rules (not stated word for word).,REQ-TEXT: text functions behave as in Salesforce,https://help.salesforce.com/s/articleView?id=platform.customize_functions_value.htm&type=5,Yes
+TEXT-HTML-001,Medium,"Claude (AI), review pending",2026-10-05,Automated (npm run cases:report),2026-10-05,HTML: a javascript: URL from a field gets no href in joined HTML; the label stays as text,a javascript: URL from a field gets no href in joined HTML; the label stays as text,None,"1. Apply the pre-conditions.
+2. Evaluate the formula in Test Data with the field values in Test Data.
+3. Compare the result type and value with Expected Results.","Field Url__c (text) = ""javascript:alert(1)""
+Formula:
+""Go: "" & HYPERLINK(Url__c, ""click"")","html: ""Go: click""",The evaluation returns a result and throws nothing.,Pass,"Confidence: derived. Expected result derived from documented rules (not stated word for word).
+generated HTML must never carry a script URL (safety contract of this library)",REQ-TEXT: text functions behave as in Salesforce,"Salesforce Help: Formula Operators and Functions by Context, https://help.salesforce.com/s/articleView?id=platform.customize_functions.htm&type=5",Yes
+TEXT-HTML-002,Medium,"Claude (AI), review pending",2026-10-05,Automated (npm run cases:report),2026-10-05,HTML: a JavaScript: URL with mixed case and leading spaces is refused too,a JavaScript: URL with mixed case and leading spaces is refused too,None,"1. Apply the pre-conditions.
+2. Evaluate the formula in Test Data with the field values in Test Data.
+3. Compare the result type and value with Expected Results.","Field Url__c (text) = ""  JavaScript:alert(1)""
+Formula:
+""Go: "" & HYPERLINK(Url__c, ""click"")","html: ""Go: click""",The evaluation returns a result and throws nothing.,Pass,"Confidence: derived. Expected result derived from documented rules (not stated word for word).
+generated HTML must never carry a script URL (safety contract of this library)",REQ-TEXT: text functions behave as in Salesforce,"Salesforce Help: Formula Operators and Functions by Context, https://help.salesforce.com/s/articleView?id=platform.customize_functions.htm&type=5",Yes
+TEXT-HTML-003,Medium,"Claude (AI), review pending",2026-10-05,Automated (npm run cases:report),2026-10-05,HTML: a data: image source is dropped; the alt text stays,a data: image source is dropped; the alt text stays,None,"1. Apply the pre-conditions.
+2. Evaluate the formula in Test Data with the field values in Test Data.
+3. Compare the result type and value with Expected Results.","Field Src__c (text) = ""data:text/html,<script>alert(1)</script>""
+Formula:
+IMAGE(Src__c, ""logo"") & ""!""","html: ""logo!""",The evaluation returns a result and throws nothing.,Pass,"Confidence: derived. Expected result derived from documented rules (not stated word for word).
+generated HTML must never carry a script URL (safety contract of this library)",REQ-TEXT: text functions behave as in Salesforce,"Salesforce Help: Formula Operators and Functions by Context, https://help.salesforce.com/s/articleView?id=platform.customize_functions.htm&type=5",Yes
+TEXT-HTML-004,Medium,"Claude (AI), review pending",2026-10-05,Automated (npm run cases:report),2026-10-05,HTML: https and relative URLs keep their href; text is escaped,https and relative URLs keep their href; text is escaped,None,"1. Apply the pre-conditions.
+2. Evaluate the formula in Test Data with the field values in Test Data.
+3. Compare the result type and value with Expected Results.","Formula:
+""<b>"" & HYPERLINK(""https://x.example/?a=1&b=2"", ""x"") & HYPERLINK(""/001"", ""y"")","html: ""&#60;b&#62;<a href=\""https://x.example/?a=1&#38;b=2\"" target=\""_blank\"">x</a><a href=\""/001\"" target=\""_blank\"">y</a>""",The evaluation returns a result and throws nothing.,Pass,"Confidence: derived. Expected result derived from documented rules (not stated word for word).
+text pieces are HTML-escaped, safe URLs are kept",REQ-TEXT: text functions behave as in Salesforce,"Salesforce Help: Formula Operators and Functions by Context, https://help.salesforce.com/s/articleView?id=platform.customize_functions.htm&type=5",Yes
 DATETIME-ADDMONTHS-001,Medium,"Claude (AI), review pending",2026-10-05,Automated (npm run cases:report),2026-10-05,ADDMONTHS: Doc example: Sept 20 2017 + 5 months = Feb 20 2018,Doc example: Sept 20 2017 + 5 months = Feb 20 2018,None,"1. Apply the pre-conditions.
 2. Evaluate the formula in Test Data with the field values in Test Data.
 3. Compare the result type and value with Expected Results.","Field StartDate (date) = ""2017-09-20""
