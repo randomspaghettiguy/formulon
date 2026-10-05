@@ -1,35 +1,31 @@
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
+import js from '@eslint/js';
 
-// Load required plugins and parser
-import eslintParser from '@babel/eslint-parser';
-import airbnbBase from 'eslint-config-airbnb-base';
-
-// Airbnb base config uses eslint-plugin-import
-import eslintPluginImport from 'eslint-plugin-import';
+const nodeAndBrowser = {
+  console: 'readonly',
+  process: 'readonly',
+  performance: 'readonly',
+  URL: 'readonly',
+};
 
 export default [
+  { ignores: ['node_modules/**', 'lib/**', 'tmp/**', 'coverage/**', '.*/**'] },
+  js.configs.recommended,
   {
-    ignores: ['node_modules/**', 'dist/**', 'src/*.grammar.js', 'lib/*.js'],
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    languageOptions: { ecmaVersion: 2022, sourceType: 'module', globals: nodeAndBrowser },
+    rules: {
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      'no-cond-assign': ['error', 'except-parens'],
+      eqeqeq: ['error', 'smart'],
+      'prefer-const': 'error',
+    },
   },
   {
-    files: ['**/*.js'],
-    languageOptions: {
-      parser: eslintParser,
-      parserOptions: {
-        requireConfigFile: false,
-        ecmaVersion: 2021,
-        sourceType: 'module',
-        babelOptions: {
-          configFile: './babel.config.js', // adjust if needed
-        },
-      },
-    },
-    plugins: {
-      import: eslintPluginImport,
-    },
-    rules: {
-      ...airbnbBase.rules,
-    },
+    files: ['**/*.cjs'],
+    languageOptions: { sourceType: 'commonjs', globals: { module: 'writable', require: 'readonly' } },
+  },
+  {
+    files: ['test/**'],
+    languageOptions: { globals: { describe: 'readonly', it: 'readonly', expect: 'readonly' } },
   },
 ];

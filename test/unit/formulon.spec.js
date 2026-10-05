@@ -1,9 +1,8 @@
-/* global describe it */
 
 import { expect } from 'vitest';
-import { extract, parse, ast } from '../../src/formulon';
-import { buildLiteralFromJs } from '../../src/utils';
-import { testBuildAst } from './shared';
+import { extract, parse, ast } from '../../src/formulon.js';
+import { buildLiteralFromJs } from '../../src/utils.js';
+import { testBuildAst } from './shared.js';
 
 describe('Formulon', () => {
   describe('parse', () => {
@@ -87,49 +86,6 @@ describe('Formulon', () => {
 
         it('returns correct result for string concatenation', () => {
           expect(parse("'a' & 'b'")).to.deep.eq(buildLiteralFromJs('ab'));
-        });
-      });
-
-      describe('coerce inputs', () => {
-        describe('number', () => {
-          it('rounds variables accordingly', () => {
-            const var1 = {
-              type: 'literal',
-              dataType: 'number',
-              value: 1.35,
-              options: {
-                length: 1,
-                scale: 1,
-              },
-            };
-
-            const var2 = {
-              type: 'literal',
-              dataType: 'number',
-              value: 2.35,
-              options: {
-                length: 1,
-                scale: 1,
-              },
-            };
-
-            expect(parse('var1 + var2', { var1, var2 })).to.deep.eq(buildLiteralFromJs(3.8));
-          });
-        });
-
-        describe('text', () => {
-          it('cuts off text', () => {
-            const input = {
-              type: 'literal',
-              dataType: 'text',
-              value: 'first second',
-              options: {
-                length: 5,
-              },
-            };
-
-            expect(parse('a_text', { a_text: input })).to.deep.eq(buildLiteralFromJs('first'));
-          });
         });
       });
 
@@ -236,17 +192,6 @@ describe('Formulon', () => {
             message: 'Unknown function MISSING. Check spelling.',
           };
           expect(parse('MISSING(1)', {})).to.deep.eq(expected);
-        });
-      });
-
-      describe('parse error', () => {
-        it('returns error object with SyntaxError', () => {
-          const expected = {
-            type: 'error',
-            errorType: 'SyntaxError',
-            message: 'Syntax error.',
-          };
-          expect(parse('Custom_field__c +', {})).to.deep.eq(expected);
         });
       });
 

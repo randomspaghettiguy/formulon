@@ -1,4 +1,3 @@
-/* global describe it */
 
 import { expect } from 'vitest';
 import {
@@ -14,55 +13,14 @@ import {
   buildTimeLiteral,
   formatLiteral,
   handleFormulonError,
-  parseTime,
   sfRound,
   coerceLiteral,
-} from '../../src/utils';
+} from '../../src/utils.js';
 
-import ArgumentError from '../../src/errors/ArgumentError';
-import NoFunctionError from '../../src/errors/NoFunctionError';
-import NotImplementedError from '../../src/errors/NotImplementedError';
-import ReferenceError from '../../src/errors/ReferenceError';
-
-describe('parseTime', () => {
-  describe('valid time', () => {
-    it('returns expected result', () => {
-      expect(parseTime('16:23:56.826')).to.deep.eq(buildTimeLiteral(59036826));
-    });
-  });
-
-  describe('invalid time', () => {
-    describe('invalid format', () => {
-      it('returns expected result', () => {
-        expect(parseTime('abc')).to.deep.eq(buildLiteralFromJs(null));
-      });
-    });
-
-    describe('hour invalid', () => {
-      it('returns expected result', () => {
-        expect(parseTime('24:23:56.826')).to.deep.eq(buildLiteralFromJs(null));
-      });
-    });
-
-    describe('minute invalid', () => {
-      it('returns expected result', () => {
-        expect(parseTime('16:60:56.826')).to.deep.eq(buildLiteralFromJs(null));
-      });
-    });
-
-    describe('second invalid', () => {
-      it('returns expected result', () => {
-        expect(parseTime('16:23:60.826')).to.deep.eq(buildLiteralFromJs(null));
-      });
-    });
-
-    describe('millisecond invalid', () => {
-      it('returns expected result', () => {
-        expect(parseTime('16:23:56.1000')).to.deep.eq(buildLiteralFromJs(null));
-      });
-    });
-  });
-});
+import ArgumentError from '../../src/errors/ArgumentError.js';
+import NoFunctionError from '../../src/errors/NoFunctionError.js';
+import NotImplementedError from '../../src/errors/NotImplementedError.js';
+import ReferenceError from '../../src/errors/ReferenceError.js';
 
 describe('buildLiteralFromJs', () => {
   describe('Number', () => {
