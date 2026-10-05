@@ -64,6 +64,15 @@ const tokenize = (src) => {
       const end = src.indexOf('*/', i + 2);
       if (end === -1) fail('Comment is not closed.', i);
       i = end + 2;
+    } else if (ch === '{' && src[i + 1] === '!') {
+      // Flow and email-template merge field: {!$Record.Amount} is the reference $Record.Amount.
+      const close = src.indexOf('}', i);
+      const name = close === -1 ? '' : src.slice(i + 2, close).trim();
+      if (!/^\$?[A-Za-z_][A-Za-z0-9_]*(?:\.\$?[A-Za-z_][A-Za-z0-9_]*)*$/.test(name)) fail('Invalid merge field {!...}.', i);
+      tokens.push({
+        kind: 'name', value: name, merge: true, offset: i,
+      });
+      i = close + 1;
     } else if (ch === '"' || ch === "'") {
       const start = i;
       let value = '';
@@ -180,6 +189,7 @@ export const parseFormula = (src) => {
       case 'string':
         return stringLiteral(token.value);
       case 'name': {
+        if (token.merge) return { type: 'identifier', name: token.value };
         if (isOp('(')) {
           if (!FUNCTION_NAME.test(token.value)) fail(`'${token.value}' is not a function name.`, token.offset);
           return call(token.value.toLowerCase(), parseArguments());
